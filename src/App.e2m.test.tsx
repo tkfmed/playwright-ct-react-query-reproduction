@@ -1,14 +1,16 @@
 import { test, expect } from "@playwright/experimental-ct-react";
 import App from "./App";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { http, HttpResponse } from "msw";
 
-test.use({ viewport: { width: 500, height: 500 } });
+test("should work", async ({ mount, router  }) => {
+  await router.use(http.get('/api/test', async () => {
+    return HttpResponse.json(1337);
+  }));
 
-test("should work", async ({ mount }) => {
-  const component = await mount(
-    <QueryClientProvider client={new QueryClient()}>
-      <App />
-    </QueryClientProvider>
-  );
-  await expect(component).toContainText("and save to test HMR");
+  const component = await mount(<App />);
+  await expect(component).toContainText("count is 1337");
+
+  component.getByRole("button").click();
+
+  await expect(component).toContainText("count is 1338");
 });

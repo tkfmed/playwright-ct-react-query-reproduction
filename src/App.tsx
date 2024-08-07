@@ -2,14 +2,25 @@ import reactLogo from "./assets/react.svg";
 import viteLogo from "/vite.svg";
 import "./App.css";
 import { useQuery } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
 
 function App() {
   const query = useQuery({
-    queryKey:["test"],
+    queryKey: ["test"],
     queryFn: () =>
-      fetch("/api/test", { method: "GET" }).then((res) => res.json()).then(r => Number(r)),
-    select: (data) => data ?? 0
+      fetch("/api/test", { method: "GET" })
+        .then((res) => res.json())
+        .then((r) => Number(r)),
+    select: (data) => data ?? 0,
   });
+
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    if (query.status === "success") {
+      setCount(query.data);
+    }
+  }, [query.data, query.status]);
 
   return (
     <>
@@ -23,8 +34,8 @@ function App() {
       </div>
       <h1>Vite + React</h1>
       <div className="card">
-        <button>
-          count is {query.data}
+        <button onClick={() => setCount((prev) => prev + 1)}>
+          count is {count}
         </button>
         <p>
           Edit <code>src/App.tsx</code> and save to test HMR
